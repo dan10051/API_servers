@@ -12,6 +12,22 @@ pipelines:
            - sed -i "s/define('DB_NAME', ''/define('DB_NAME', '$DB_NAME_EXP'/" override.config.php
            - sed -i "s/define('DB_USER', ''/define('DB_USER', '$DB_USER_EXP'/" override.config.php
            - sed -i "s/define('DB_PASS', ''/define('DB_PASS', '$DB_PASS_EXP'/" override.config.php
+           - sed -i "s/define('DB_V2_HOST', \$db_host/define('DB_V2_HOST', '$DB_HOST_EXP'/" override.config.php
+           - sed -i "s/define('DB_V2_NAME', ''/define('DB_V2_NAME', '$DB_NAME_EXP'/" override.config.php
+           - sed -i "s/define('DB_V2_USER', ''/define('DB_V2_USER', '$DB_USER_EXP'/" override.config.php
+           - sed -i "s/define('DB_V2_PASS', ''/define('DB_V2_PASS', '$DB_PASS_EXP'/" override.config.php
+
+           - sed -i "s/define('PAYPAL_LIVE_USERNAME', ''/define('PAYPAL_LIVE_USERNAME', '$PAYPAL_LIVE_USERNAME'/" override.config.php
+
+           - sed -i "s/define(\"KC_CDN_FTP_SERVER\", \"\"/define(\"KC_CDN_FTP_SERVER\", \"$KC_CDN_FTP_SERVER\"/" override.config.php
+           - sed -i "s/define(\"KC_CDN_FTP_USERNAME\", \"\"/define(\"KC_CDN_FTP_USERNAME\", \"$KC_CDN_FTP_USERNAME\"/" override.config.php
+           - sed -i "s/define(\"KC_CDN_FTP_PASSWORD\", \"\"/define(\"KC_CDN_FTP_PASSWORD\", \"$KC_CDN_FTP_PASSWORD\"/" override.config.php
+
+           - sed -i "s/define('DB_PASS', ''/define('DB_PASS', '$DB_PASS_EXP'/" override.config.php
+           - echo $test1 > override.config.php
+
+
+
 #         - sed -i "s/%DB_USER%/$DB_USER_STABLE/" api/config.php
 #         - sed -i "s/%DB_PASS%/$DB_PASS_STABLE/" api/config.php
 #         - sed -i "s/DEBUGMODE\", false/DEBUGMODE\", $DEBUGMODE/" api/config.php
