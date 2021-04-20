@@ -1,0 +1,40 @@
+#image: node:10.19.0
+
+pipelines:
+  custom:
+    deployment-exp-Manual: # Another display name
+    - step:                        # exp-test-pipe  deploy
+       name: Deploy exp API MANUALY
+       deployment: experimental
+       script:
+           - cp sample.override.config.php override.config.php
+           - sed -i "s/define('DB_HOST', \$db_host/define('DB_HOST', '$DB_HOST_EXP'/" override.config.php
+           - sed -i "s/define('DB_NAME', ''/define('DB_NAME', '$DB_NAME_EXP'/" override.config.php
+           - sed -i "s/define('DB_USER', ''/define('DB_USER', '$DB_USER_EXP'/" override.config.php
+           - sed -i "s/define('DB_PASS', ''/define('DB_PASS', '$DB_PASS_EXP'/" override.config.php
+#         - sed -i "s/%DB_USER%/$DB_USER_STABLE/" api/config.php
+#         - sed -i "s/%DB_PASS%/$DB_PASS_STABLE/" api/config.php
+#         - sed -i "s/DEBUGMODE\", false/DEBUGMODE\", $DEBUGMODE/" api/config.php
+#         - sed -i "s/SESSION_TTL', '1500/SESSION_TTL', '$SESSION_TTL/" api/config.php
+#         - sed -i "s|DOCUMENT_SUBROOT\", \"|DOCUMENT_SUBROOT\", \"$DOCUMENT_SUBROOT|g" api/sys.config.php
+#         - npm install
+#         - npm update
+#         - npm install -g gulp
+#         - gulp treser-js
+#         - gulp minify-css
+#         - gulp minify-html
+
+           - pipe: atlassian/rsync-deploy:0.4.4
+             variables:
+               USER: '$DEPLOY_USER'
+               SERVER: '$DEPLOY_SERVER_EXP'
+               REMOTE_PATH: '$DEPLOY_REMOTE_PATH'
+               LOCAL_PATH: '${BITBUCKET_CLONE_DIR}/'
+               EXTRA_ARGS: '--exclude-from=.gitignore'
+
+#         - pipe: atlassian/aws-cloudfront-invalidate:0.5.0
+#           variables:
+#             AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+#             AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+#             AWS_DEFAULT_REGION: us-west-2
+#             DISTRIBUTION_ID: 'E2F0SM5U1VPLLT'
