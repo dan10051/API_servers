@@ -7,6 +7,10 @@ pipelines:
          name: Deploy EXP API
          script:
            - echo $EXP_OVERRIDE_CONFIG_PHP > override.config.php
+           - echo $jobList_txt > background/jobsList.txt
+           - sed -i "s/knowledgecity.com\/vendors\/kc\/webplayer\/2.0/kcexp.pro\/vendors\/kc\/webplayer/" assets/lessons/quiz/index.html
+           - sed -i "s/kcquiz.knowledgecity.com/kcquiz.kcexp.pro/" assets/lessons/quiz/index.html
+           - sed -i "s/token:/ApiUrl:'https:\/\/api.kcexp.pro\/v2\/', CDNUrl:'\/\/cdn0.kcexp.pro\/', token:/" assets/lessons/quiz/index.html
 
            - pipe: atlassian/rsync-deploy:0.4.4
              variables:
