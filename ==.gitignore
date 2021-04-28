@@ -1,0 +1,20 @@
+/nbproject
+.DS_Store
+Icon
+Thumbs.db
+/.idea
+#ignore override files, like override.sys.config.php
+override.sys.config.php
+!override.config.php
+#override.*
+error.log
+background_debug.php
+/vendor/
+/converter
+CDNprgeList.txt
+/.phpunit.result.cache
+/assets_override/
+.bitbucket
+.git
+.gitignore
+bitbucket-pipelines.yml
