@@ -1,0 +1,167 @@
+<?php
+
+
+class Logger
+{
+    private static $_instance = null;
+    var $hookedClasses = array();
+    var $backgroundFunctions = array();
+
+    private function __construct()
+    {
+    }
+
+    private function __clone()
+    {
+    }
+
+    private function _write($session, $method, $resource, $params, $date, $time, $code, $text, $resourceFile)
+    {
+        if(!API_REQUEST_GUID) return false;
+        if(!defined("LOGDB_NAME") || !LOGDB_NAME || !defined("LOGDB_ENABLED") || !LOGDB_ENABLED) return false;
+        $sqls = array();
+
+        if($resource == 'v2/auth'){
+            if(isset($params['password'])) $params['password'] = '***';
+        }
+
+        $api_log_guid = API_REQUEST_GUID;
+        $fields = array(
+            "id" => $api_log_guid,
+            "api_sessions_id" => $session ? (string)$session : NULL,
+            "method" => strval($method),
+            "resource" => strval($resource),
+            "params" => json_encode($params),
+            "date" => strval($date),
+            "execution_time" => $time,
+            "response_code" => strval($code),
+            "response_text" => strval($text),
+            "user_ip" => UserHelper::GetUserIP(),
+            "SQLexecuted" => DataBase::getTotals('sqlQueries'),
+            "SQLreadFromCache" => DataBase::getTotals('readFromCache'),
+            "resource_file" => strval($resourceFile)
+        );
+        $session = $session ? (string)$session : NULL;
+
+        $sqls[] = $sql = "UPDATE `".LOGDB_NAME."`.`api_sys_log` SET `api_sessions_id` = '".strval($session)."', `method` = '".strval($method)."', `resource` = '".strval($resource)."', `params` = '".addslashes(json_encode($params))."', `date` = '".strval($date)."', `execution_time` = '".$time."', `response_code` = '".strval($code)."', `response_text` = '".strval(addslashes($text))."', `user_ip` = '".UserHelper::GetUserIP()."', `SQLexecuted` = '".DataBase::getTotals('sqlQueries')."', `SQLreadFromCache` = '".DataBase::getTotals('readFromCache')."', `resource_file` = '".strval($resourceFile)."' WHERE `id` = '".$api_log_guid."'";
+        // $insert_id = DataBase::insert('`'.LOGDB_NAME.'`.`api_sys_log`', $fields);
+
+        // $sqls[] = "INSERT INTO `".LOGDB_NAME."`.`api_sys_log` (`id`,`api_sessions_id`,`method`,`resource`,`params`,`date`,`execution_time`,`response_code`,`response_text`,`user_ip`,`SQLexecuted`,`SQLreadFromCache`,`resource_file`) VALUES ('".$api_log_guid."','".($session ? (string)$session : NULL)."','".strval($method)."','".strval($resource)."','".addslashes(json_encode($params))."','".strval($date)."','".$time."','".strval($code)."','".addslashes(strval($text))."','".UserHelper::GetUserIP()."','".DataBase::getTotals('sqlQueries')."','".DataBase::getTotals('readFromCache')."','".strval($resourceFile)."')";
+
+        // write SQL log
+        $cache = DataBase::getTotals();
+        $sqlQueries = $cache['sqlQueriesDetails'];
+        // $cacheFilePath = LOG_PATH.'/resources_db_queries/'.$api_log_guid.'.json';
+        if(sizeof($sqlQueries)){
+            $inserBlocks = array();
+            foreach ($sqlQueries as $order => $value) {
+
+                if(!is_null($value['SQLerror']))
+                    $SQLerror = "'".strval(addslashes(trim(json_encode($value['SQLerror']))))."'";
+                else
+                    $SQLerror = "NULL";
+
+                $inserBlocks[] = "('".$api_log_guid."', '".$order."', '".strval(trim($value['type']))."', '".strval(addslashes(trim($value['query'])))."', '".strval(addslashes(trim($value['debug_backtrace'])))."', '".md5(strval(addslashes(trim($value['query']))))."', '".md5(strval(addslashes(trim($value['debug_backtrace']))))."', ".$SQLerror.", '".intval($value['success'])."', ".floatval($value['tte']).", ".floatval($value['timestamp']).", '".intval($value['fromCache'])."', ".($value['server'] ? "'".$value['server']."'" : "null").")";
+            }
+            $sqls[] = $sql = "INSERT INTO `".LOGDB_NAME."`.`api_resources_sql_queries` (`api_log_id`, `order`, `type`, `query`, `debug_backtrace`, `query_md5`, `debug_backtrace_md5`, `SQLerror`, `success`, `tte`,`timestamp`, `fromCache`, `server`) VALUES ".implode(", ", $inserBlocks);
+        }
+
+
+        $hookedClasses = Logger::getInstance()->hookedClasses;
+        if(sizeof($hookedClasses)){
+            $i = 0;
+            $inserBlocks = array();
+            foreach($hookedClasses as $class){
+                $inserBlocks[] = "('".$api_log_guid."', '".$i."', '".strval(trim($class))."')";
+                $i++;
+            }
+            $sqls[] = $sql = "INSERT INTO `".LOGDB_NAME."`.`api_resources_hooked_classes` (`api_log_id`, `order`, `class`) VALUES ".implode(", ", $inserBlocks);
+
+        }
+
+        //
+        $backgroundFunctions = Logger::getInstance()->backgroundFunctions;
+
+        if(sizeof($backgroundFunctions)){
+            $i = 0;
+            $inserBlocks = array();
+            foreach($backgroundFunctions as $jobId){
+                $inserBlocks[] = "('".$api_log_guid."', '".$i."', '".strval(trim($jobId))."')";
+                $i++;
+            }
+            $sqls[] = $sql = "INSERT INTO `".LOGDB_NAME."`.`api_resources_background_functions` (`api_log_id`, `order`, `jobId`) VALUES ".implode(", ", $inserBlocks);
+        }
+
+
+
+        // DataBase::query($sql);
+        Logger::writeApiLogFile(implode("\n----\n",$sqls));
+        // $logFilePath = LOG_PATH."/api_log_queries/".API_REQUEST_GUID.".sql";
+        // // echo $logFilePath;
+        // file_put_contents($logFilePath, implode("\n----\n",$sqls));
+
+        return $api_log_guid;
+    }
+
+    function writeApiLogFile($sql){
+        if(!API_REQUEST_GUID) return false;
+        if(API_REQUEST_GUID == "API_REQUEST_GUID") return false;
+        $logFilePath = LOG_PATH."/api_log_queries/".API_REQUEST_GUID.".sql";
+        file_put_contents($logFilePath, $sql, FILE_APPEND);
+    }
+
+    function registerHookedClass($class){
+        Logger::getInstance()->hookedClasses[] = $class;
+    }
+
+    public static function registerBackgroundFunction($jobId){
+        Logger::getInstance()->backgroundFunctions[] = $jobId;
+    }
+
+    function sendAPINotification($channelID, $subject, $reportContent){
+        if(defined("NOTIFICATIONS_HOOK_URL") && NOTIFICATIONS_HOOK_URL[$channelID])
+            $url = "https://hooks.slack.com/services/".NOTIFICATIONS_HOOK_URL[$channelID];
+        else
+            return false;
+
+        $post = $_POST;
+        // hiding sensitive information to not expose it in the notification
+        if(isset($post['password'])) $post['password'] = "***";
+        if(isset($post['pin'])) $post['pin'] = "***";
+
+        $get = $_GET;
+
+        $reportContent = $reportContent.
+        "\n\nDate: ".date("Y-m-d H:i:s e", time()).
+        "\n\n_POST: ".serialize($post).
+        "\n\n_GET: ".serialize($get).
+        "\n\n_FILES: ".serialize($_FILES).
+        "\n\nServer Hostname: ".gethostname();
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array(
+            'text' => "*".$subject."*\n".$reportContent
+        )));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+
+        $response = curl_exec($ch);
+
+        return true;
+    }
+
+    public static function getInstance()
+    {
+        if (!is_object(self::$_instance)) {
+            self::$_instance = new Logger();
+        }
+        return self::$_instance;
+    }
+
+    public static function Write($session, $method, $resource, $params, $date, $time, $code, $text, $resourceFile)
+    {
+        return Logger::getInstance()->_write($session, $method, $resource, $params, $date, $time, $code, $text, $resourceFile);
+    }
+}
