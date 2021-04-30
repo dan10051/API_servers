@@ -60,9 +60,9 @@ class Logger
             "SQLexecuted" => DataBase::getTotals('sqlQueries'),
             "SQLreadFromCache" => DataBase::getTotals('readFromCache'),
             "resource_file" => strval($resourceFile),
-            "cpu" => {{%logcpuload%}},
-            "server" => {{%loghostname%}},
-            "apiid" => ".APIID."
+//            "cpu" => {{%logcpuload%}},
+//            "server" => {{%loghostname%}},
+//            "apiid" => ".APIID."
         );
 
         $session = $session ? (string)$session : NULL;
