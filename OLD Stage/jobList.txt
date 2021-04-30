@@ -1,0 +1,10 @@
+[
+  {
+    "title": "clearcdn",
+    "interval": 60
+  },
+  {
+    "title": "reminder",
+    "interval": 300
+  }
+]
