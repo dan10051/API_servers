@@ -93,6 +93,7 @@ class Logger
             $sqls[] = $sql = "INSERT INTO `".LOGDB_NAME."`.`api_resources_sql_queries` (`api_log_id`, `order`, `type`, `query`, `debug_backtrace`, `query_md5`, `debug_backtrace_md5`, `SQLerror`, `success`, `tte`,`timestamp`, `fromCache`, `server`) VALUES ".implode(", ", $inserBlocks);
         }
 
+          $this->logs_to_scv($inserBlocks, "api_resources_sql_queries");
 
         $hookedClasses = Logger::getInstance()->hookedClasses;
         if(sizeof($hookedClasses)){
@@ -240,7 +241,8 @@ class Logger
     private function logs_to_scv(array $arFields, string $table)
     {
 //        $outputFile = LOG_PATH."/api_log_queries/".$table."/".API_REQUEST_GUID.".csv";
-        $outputFile = LOG_PATH."/api_log_queries/".$table."/api_sql_logs.csv";
+//        $outputFile = LOG_PATH."/api_log_queries/".$table."/api_sql_logs.csv";
+        $outputFile = "/s3-api-exp-sql-logs/".$table."/api_sql_logs.csv";
 
         $fpOut = fopen($outputFile, "a");
         fputcsv($fpOut, $arFields, ',');
