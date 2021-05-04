@@ -67,11 +67,32 @@ class Logger
                     $SQLerror = "NULL";
 
                 $inserBlocks[] = "('".$api_log_guid."', '".$order."', '".strval(trim($value['type']))."', '".strval(addslashes(trim($value['query'])))."', '".strval(addslashes(trim($value['debug_backtrace'])))."', '".md5(strval(addslashes(trim($value['query']))))."', '".md5(strval(addslashes(trim($value['debug_backtrace']))))."', ".$SQLerror.", '".intval($value['success'])."', ".floatval($value['tte']).", ".floatval($value['timestamp']).", '".intval($value['fromCache'])."', ".($value['server'] ? "'".$value['server']."'" : "null").")";
+
+                $Fields_sql_queries = array(
+                    "api_log_id" => $api_log_guid,
+                    "order" => $order,
+                    "type" => strval(trim($value['type'])),
+                    "query" => strval(addslashes(trim($value['query']))),
+                    "debug_backtrace" => strval(addslashes(trim($value['debug_backtrace']))),
+                    "query_md5" => md5(strval(addslashes(trim($value['query'])))),
+                    "debug_backtrace_md5" => md5(strval(addslashes(trim($value['debug_backtrace'])))),
+                    "SQLerror" => $SQLerror,
+                    "success" => intval($value['success']),
+                    "tte" => floatval($value['tte']),
+                    "timestamp" => floatval($value['timestamp']),
+                    "fromCache" => intval($value['fromCache']),
+                    "server" => ($value['server']? "'".$value['server']."'" : "null")
+                    //errorResponse
+
+                );
+
+//                $inserBlocks_t[] = "'".$api_log_guid."', '".$order."', '".strval(trim($value['type']))."', '".strval(addslashes(trim($value['query'])))."', '".strval(addslashes(trim($value['debug_backtrace'])))."', '".md5(strval(addslashes(trim($value['query']))))."', '".md5(strval(addslashes(trim($value['debug_backtrace']))))."', ".$SQLerror.", '".intval($value['success'])."', ".floatval($value['tte']).", ".floatval($value['timestamp']).", '".intval($value['fromCache'])."', ".($value['server'] ? "'".$value['server']."'" : "null").";
+
             }
             $sqls[] = $sql = "INSERT INTO `".LOGDB_NAME."`.`api_resources_sql_queries` (`api_log_id`, `order`, `type`, `query`, `debug_backtrace`, `query_md5`, `debug_backtrace_md5`, `SQLerror`, `success`, `tte`,`timestamp`, `fromCache`, `server`) VALUES ".implode(", ", $inserBlocks);
         }
 
-          $this->logs_to_scv($inserBlocks, "api_resources_sql_queries", $api_log_guid);
+          $this->logs_to_scv($Fields_sql_queries, "api_resources_sql_queries", $api_log_guid);
 
         $hookedClasses = Logger::getInstance()->hookedClasses;
         if(sizeof($hookedClasses)){
@@ -82,6 +103,8 @@ class Logger
                 $i++;
             }
             $sqls[] = $sql = "INSERT INTO `".LOGDB_NAME."`.`api_resources_hooked_classes` (`api_log_id`, `order`, `class`) VALUES ".implode(", ", $inserBlocks);
+
+          $this->logs_to_scv($inserBlocks_t, "api_resources_hooked_classes", $api_log_guid);
 
         }
 
@@ -96,6 +119,8 @@ class Logger
                 $i++;
             }
             $sqls[] = $sql = "INSERT INTO `".LOGDB_NAME."`.`api_resources_background_functions` (`api_log_id`, `order`, `jobId`) VALUES ".implode(", ", $inserBlocks);
+
+          $this->logs_to_scv($inserBlocks_t, "api_resources_background_functions", $api_log_guid);
         }
 
 
@@ -220,7 +245,7 @@ class Logger
     {
 //        $outputFile = LOG_PATH."/api_log_queries/".$table."/".API_REQUEST_GUID.".csv";
 //        $outputFile = LOG_PATH."/api_log_queries/".$table."/api_sql_logs.csv";
-        $outputFile = LOG_PATH."/api_log_queries/".$table."/".$api_log_guid."csv";
+        $outputFile = LOG_PATH."/api_log_queries/".$table."/".$api_log_guid.".csv";
 //        $outputFile = "/s3-api-exp-sql-logs/".$table."/".$api_log_guid.".csv";
 
         $fpOut = fopen($outputFile, "a");
