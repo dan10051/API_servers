@@ -46,34 +46,12 @@ class Logger
 
         );
 
-        $arFields_api_sys_log = array(
-            "id" => $api_log_guid,
-            "api_sessions_id" => $session ? (string)$session : NULL,
-            "method" => strval($method),
-            "resource" => strval($resource),
-            "params" => json_encode($params),
-            "date" => strval($date),
-            "execution_time" => $time,
-            "response_code" => strval($code),
-            "response_text" => strval($text),
-            "user_ip" => UserHelper::GetUserIP(),
-            "SQLexecuted" => DataBase::getTotals('sqlQueries'),
-            "SQLreadFromCache" => DataBase::getTotals('readFromCache'),
-            "resource_file" => strval($resourceFile),
-//            "cpu" => {{%logcpuload%}},
-//            "server" => {{%loghostname%}},
-//            "apiid" => ".APIID."
-        );
 
         $session = $session ? (string)$session : NULL;
 
-        $this->logs_to_scv($arFields_api_sys_log, "api_sys_log");
+        $this->logs_to_scv($arFields, "api_sys_log", $api_log_guid);
 
-//       $sqls[] = $sql = "UPDATE `".LOGDB_NAME."`.`api_sys_log` SET `api_sessions_id` = '".strval($session)."', `method` = '".strval($method)."', `resource` = '".strval($resource)."', `params` = '".addslashes(json_encode($params))."', `date` = '".strval($date)."', `execution_time` = '".$time."', `response_code` = '".strval($code)."', `response_text` = '".strval(addslashes($text))."', `user_ip` = '".UserHelper::GetUserIP()."', `SQLexecuted` = '".DataBase::getTotals('sqlQueries')."', `SQLreadFromCache` = '".DataBase::getTotals('readFromCache')."', `resource_file` = '".strval($resourceFile)."' WHERE `id` = '".$api_log_guid."'";
         $sqls[] = $sql = "'".strval($session)."','".strval($method)."','".strval($resource)."','".addslashes(json_encode($params))."','".strval($date)."','".$time."','".strval($code)."','".strval(addslashes($text))."', `user_ip` = '".UserHelper::GetUserIP()."', `SQLexecuted` = '".DataBase::getTotals('sqlQueries')."', `SQLreadFromCache` = '".DataBase::getTotals('readFromCache')."', `resource_file` = '".strval($resourceFile)."' WHERE `id` = '".$api_log_guid."'";
-        // $insert_id = DataBase::insert('`'.LOGDB_NAME.'`.`api_sys_log`', $fields);
-
-        // $sqls[] = $sql = "INSERT INTO `".LOGDB_NAME."`.`api_sys_log` (`id`,`api_sessions_id`,`method`,`resource`,`params`,`date`,`execution_time`,`response_code`,`response_text`,`user_ip`,`SQLexecuted`,`SQLreadFromCache`,`resource_file`) VALUES ('".$api_log_guid."','".($session ? (string)$session : NULL)."','".strval($method)."','".strval($resource)."','".addslashes(json_encode($params))."','".strval($date)."','".$time."','".strval($code)."','".addslashes(strval($text))."','".UserHelper::GetUserIP()."','".DataBase::getTotals('sqlQueries')."','".DataBase::getTotals('readFromCache')."','".strval($resourceFile)."')";
 
         // write SQL log
         $cache = DataBase::getTotals();
@@ -93,7 +71,7 @@ class Logger
             $sqls[] = $sql = "INSERT INTO `".LOGDB_NAME."`.`api_resources_sql_queries` (`api_log_id`, `order`, `type`, `query`, `debug_backtrace`, `query_md5`, `debug_backtrace_md5`, `SQLerror`, `success`, `tte`,`timestamp`, `fromCache`, `server`) VALUES ".implode(", ", $inserBlocks);
         }
 
-          $this->logs_to_scv($inserBlocks, "api_resources_sql_queries");
+          $this->logs_to_scv($inserBlocks, "api_resources_sql_queries", $api_log_guid);
 
         $hookedClasses = Logger::getInstance()->hookedClasses;
         if(sizeof($hookedClasses)){
@@ -238,14 +216,15 @@ class Logger
     }
 
 
-    private function logs_to_scv(array $arFields, string $table)
+    private function logs_to_scv(array $Fields, string $table, string $api_log_guid )
     {
 //        $outputFile = LOG_PATH."/api_log_queries/".$table."/".API_REQUEST_GUID.".csv";
 //        $outputFile = LOG_PATH."/api_log_queries/".$table."/api_sql_logs.csv";
-        $outputFile = "/s3-api-exp-sql-logs/".$table."/".$api_log_guid.".csv";
+        $outputFile = LOG_PATH."/api_log_queries/".$table."/".$api_log_guid."csv";
+//        $outputFile = "/s3-api-exp-sql-logs/".$table."/".$api_log_guid.".csv";
 
         $fpOut = fopen($outputFile, "a");
-        fputcsv($fpOut, $arFields, ',');
+        fputcsv($fpOut, $Fields, ',');
         fclose($fpOut);
     }
 
