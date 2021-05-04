@@ -242,7 +242,7 @@ class Logger
     {
 //        $outputFile = LOG_PATH."/api_log_queries/".$table."/".API_REQUEST_GUID.".csv";
 //        $outputFile = LOG_PATH."/api_log_queries/".$table."/api_sql_logs.csv";
-        $outputFile = "/s3-api-exp-sql-logs/".$table."/api_sql_logs.csv";
+        $outputFile = "/s3-api-exp-sql-logs/".$table."/".$api_log_guid.".csv";
 
         $fpOut = fopen($outputFile, "a");
         fputcsv($fpOut, $arFields, ',');

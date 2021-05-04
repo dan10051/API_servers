@@ -1,0 +1,81 @@
+pipelines:
+
+
+  branches:
+
+    stage:
+      - step:                        # Stage deploy
+         name: Deploy STAGE API
+         script:
+           - echo $STAGE_OVERRIDE_CONFIG_PHP > override.config.php
+           - echo $jobList_txt_STAGE > background/jobsList.txt
+           - sed -i "s/knowledgecity.com\/vendors\/kc\/webplayer\/2.0/kcstage.pro\/vendors\/kc\/webplayer/" assets/lessons/quiz/index.html
+           - sed -i "s/kcquiz.knowledgecity.com/kcquiz.kcstage.pro/" assets/lessons/quiz/index.html
+           - sed -i "s/token:/ApiUrl:'https:\/\/api.kcstage.pro\/v2\/', CDNUrl:'\/\/cdn0.kcstage.pro\/', token:/" assets/lessons/quiz/index.html
+
+           - pipe: atlassian/rsync-deploy:0.4.4
+             variables:
+               USER: '$DEPLOY_USER'
+               SERVER: '$DEPLOY_SERVER_STAGE'
+               REMOTE_PATH: '$DEPLOY_REMOTE_PATH'
+               LOCAL_PATH: '${BITBUCKET_CLONE_DIR}/'
+               EXTRA_ARGS: '--exclude-from=.gitignore'
+
+           - pipe: atlassian/aws-cloudfront-invalidate:0.5.0
+             variables:
+               AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+               AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+               AWS_DEFAULT_REGION: us-west-2
+               DISTRIBUTION_ID: 'E2V5L5FKL7S891'
+
+
+
+  custom:
+    deployment-Stable-API-Manual: # Another display name
+    - step:                        # Prod deploy
+       name: Deploy STABLE API MANUALY
+       deployment: stable
+       script:
+         - echo $PROD_OVERRIDE_CONFIG_PHP > override.config.php
+
+         - pipe: atlassian/rsync-deploy:0.4.4
+           variables:
+             USER: '$DEPLOY_USER'
+             SERVER: '$DEPLOY_SERVER_STABLE'
+             REMOTE_PATH: '$DEPLOY_REMOTE_PATH_STABLE'
+             LOCAL_PATH: '${BITBUCKET_CLONE_DIR}/'
+             EXTRA_ARGS: '--exclude-from=.gitignore'
+
+         - pipe: atlassian/aws-cloudfront-invalidate:0.5.0
+           variables:
+             AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+             AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+             AWS_DEFAULT_REGION: us-west-2
+             DISTRIBUTION_ID: 'E36MF3KNHKQC70'
+
+
+    deployment-EXP-API-Manual: # Another display name
+    - step:
+       name: Deploy EXP API MANUALY
+       deployment: stable
+       script:
+         - echo $EXP_OVERRIDE_CONFIG_PHP > override.config.php
+         - echo $jobList_txt_EXP > background/jobsList.txt
+         - sed -i "s/knowledgecity.com\/vendors\/kc\/webplayer\/2.0/kcexp.pro\/vendors\/kc\/webplayer/" assets/lessons/quiz/index.html
+         - sed -i "s/kcquiz.knowledgecity.com/kcquiz.kcexp.pro/" assets/lessons/quiz/index.html
+         - sed -i "s/token:/ApiUrl:'https:\/\/api.kcexp.pro\/v2\/', CDNUrl:'\/\/cdn0.kcexp.pro\/', token:/" assets/lessons/quiz/index.html
+
+         - pipe: atlassian/rsync-deploy:0.4.4
+           variables:
+             USER: '$DEPLOY_USER'
+             SERVER: '$DEPLOY_SERVER_EXP'
+             REMOTE_PATH: '$DEPLOY_REMOTE_PATH'
+             LOCAL_PATH: '${BITBUCKET_CLONE_DIR}/'
+             EXTRA_ARGS: '--exclude-from=.gitignore'
+
+         - pipe: atlassian/aws-cloudfront-invalidate:0.5.0
+           variables:
+             AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+             AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+             AWS_DEFAULT_REGION: us-west-2
+             DISTRIBUTION_ID: 'E1N8XZT4N19Y8Q'
