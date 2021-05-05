@@ -46,10 +46,24 @@ class Logger
 
         );
 
+        $Fields_sys_log = array(
+            "id" => $api_log_guid,
+            "method" => strval($method),
+            "resource" => strval($resource),
+            "date" => strval(str_replace("\"","",$date)),
+            "response_code" => strval($code),
+            "user_ip" => UserHelper::GetUserIP(),
+            "SQLexecuted" => str_replace(DataBase::getTotals('sqlQueries'),
+            "SQLreadFromCache" => DataBase::getTotals('readFromCache'),
+            "response_text" => strval(array("\r\n","\n","\r"," "),"",$text),
+            "params" => strval(array("\r\n","\n","\r"," "),"",json_encode($params))
+        );
+
+
 
         $session = $session ? (string)$session : NULL;
 
-        $this->logs_to_scv($arFields, "api_sys_log", $api_log_guid);
+        $this->logs_to_scv($Fields_sys_log, "api_sys_log", $api_log_guid);
 
         $sqls[] = $sql = "'".strval($session)."','".strval($method)."','".strval($resource)."','".addslashes(json_encode($params))."','".strval($date)."','".$time."','".strval($code)."','".strval(addslashes($text))."', `user_ip` = '".UserHelper::GetUserIP()."', `SQLexecuted` = '".DataBase::getTotals('sqlQueries')."', `SQLreadFromCache` = '".DataBase::getTotals('readFromCache')."', `resource_file` = '".strval($resourceFile)."' WHERE `id` = '".$api_log_guid."'";
 
@@ -67,13 +81,13 @@ class Logger
                     $SQLerror = "NULL";
 
                 $inserBlocks[] = "('".$api_log_guid."', '".$order."', '".strval(trim($value['type']))."', '".strval(addslashes(trim($value['query'])))."', '".strval(addslashes(trim($value['debug_backtrace'])))."', '".md5(strval(addslashes(trim($value['query']))))."', '".md5(strval(addslashes(trim($value['debug_backtrace']))))."', ".$SQLerror.", '".intval($value['success'])."', ".floatval($value['tte']).", ".floatval($value['timestamp']).", '".intval($value['fromCache'])."', ".($value['server'] ? "'".$value['server']."'" : "null").")";
-                
+
                 $Fields_sql_queries = array(
                     "api_log_id" => $api_log_guid,
                     "order" => $order,
                     "type" => strval(trim($value['type'])),
-                    "query" => strval(trim($value['query'])),
-                    "debug_backtrace" => strval(addslashes(trim($value['debug_backtrace']))),
+                    "query" => strval(str_replace(array("\r\n","\n","\r"," "),"",$value['query'])),
+                    "debug_backtrace" => strval(str_replace(array("\r\n","\n","\r"," "),"",$value['debug_backtrace'])),
                     "query_md5" => md5(strval(addslashes(trim($value['query'])))),
                     "debug_backtrace_md5" => md5(strval(addslashes(trim($value['debug_backtrace'])))),
                     "SQLerror" => $SQLerror,
@@ -85,7 +99,7 @@ class Logger
                     //errorResponse
 
                 );
-                
+
 //                $inserBlocks_t[] = "'".$api_log_guid."', '".$order."', '".strval(trim($value['type']))."', '".strval(addslashes(trim($value['query'])))."', '".strval(addslashes(trim($value['debug_backtrace'])))."', '".md5(strval(addslashes(trim($value['query']))))."', '".md5(strval(addslashes(trim($value['debug_backtrace']))))."', ".$SQLerror.", '".intval($value['success'])."', ".floatval($value['tte']).", ".floatval($value['timestamp']).", '".intval($value['fromCache'])."', ".($value['server'] ? "'".$value['server']."'" : "null").";
 
             }
