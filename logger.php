@@ -53,10 +53,10 @@ class Logger
             "date" => strval(str_replace("\"","",$date)),
             "response_code" => strval($code),
             "user_ip" => UserHelper::GetUserIP(),
-            "SQLexecuted" => str_replace(DataBase::getTotals('sqlQueries'),
+            "SQLexecuted" => DataBase::getTotals('sqlQueries'),
             "SQLreadFromCache" => DataBase::getTotals('readFromCache'),
-            "response_text" => strval(array("\r\n","\n","\r"," "),"",$text),
-            "params" => strval(array("\r\n","\n","\r"," "),"",json_encode($params))
+            "response_text" => strval(str_replace(array("\r\n","\n","\r"," "),"",$text)),
+            "params" => str_replace(array("\r\n","\n","\r"," "),"",json_encode($params))
         );
 
 
