@@ -67,12 +67,12 @@ class Logger
                     $SQLerror = "NULL";
 
                 $inserBlocks[] = "('".$api_log_guid."', '".$order."', '".strval(trim($value['type']))."', '".strval(addslashes(trim($value['query'])))."', '".strval(addslashes(trim($value['debug_backtrace'])))."', '".md5(strval(addslashes(trim($value['query']))))."', '".md5(strval(addslashes(trim($value['debug_backtrace']))))."', ".$SQLerror.", '".intval($value['success'])."', ".floatval($value['tte']).", ".floatval($value['timestamp']).", '".intval($value['fromCache'])."', ".($value['server'] ? "'".$value['server']."'" : "null").")";
-
+                
                 $Fields_sql_queries = array(
                     "api_log_id" => $api_log_guid,
                     "order" => $order,
                     "type" => strval(trim($value['type'])),
-                    "query" => strval(addslashes(trim($value['query']))),
+                    "query" => strval(trim($value['query'])),
                     "debug_backtrace" => strval(addslashes(trim($value['debug_backtrace']))),
                     "query_md5" => md5(strval(addslashes(trim($value['query'])))),
                     "debug_backtrace_md5" => md5(strval(addslashes(trim($value['debug_backtrace'])))),
@@ -85,7 +85,7 @@ class Logger
                     //errorResponse
 
                 );
-
+                
 //                $inserBlocks_t[] = "'".$api_log_guid."', '".$order."', '".strval(trim($value['type']))."', '".strval(addslashes(trim($value['query'])))."', '".strval(addslashes(trim($value['debug_backtrace'])))."', '".md5(strval(addslashes(trim($value['query']))))."', '".md5(strval(addslashes(trim($value['debug_backtrace']))))."', ".$SQLerror.", '".intval($value['success'])."', ".floatval($value['tte']).", ".floatval($value['timestamp']).", '".intval($value['fromCache'])."', ".($value['server'] ? "'".$value['server']."'" : "null").";
 
             }
@@ -249,7 +249,7 @@ class Logger
 //        $outputFile = "/s3-api-exp-sql-logs/".$table."/".$api_log_guid.".csv";
 
         $fpOut = fopen($outputFile, "a");
-        fputcsv($fpOut, $Fields, ',');
+        fputcsv($fpOut, $Fields, '#');
         fclose($fpOut);
     }
 
