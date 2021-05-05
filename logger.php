@@ -97,7 +97,6 @@ class Logger
                     "fromCache" => intval($value['fromCache']),
                     "server" => ($value['server']? "'".$value['server']."'" : "null")
                     //errorResponse
-
                 );
 
 //                $inserBlocks_t[] = "'".$api_log_guid."', '".$order."', '".strval(trim($value['type']))."', '".strval(addslashes(trim($value['query'])))."', '".strval(addslashes(trim($value['debug_backtrace'])))."', '".md5(strval(addslashes(trim($value['query']))))."', '".md5(strval(addslashes(trim($value['debug_backtrace']))))."', ".$SQLerror.", '".intval($value['success'])."', ".floatval($value['tte']).", ".floatval($value['timestamp']).", '".intval($value['fromCache'])."', ".($value['server'] ? "'".$value['server']."'" : "null").";
@@ -118,7 +117,13 @@ class Logger
             }
             $sqls[] = $sql = "INSERT INTO `".LOGDB_NAME."`.`api_resources_hooked_classes` (`api_log_id`, `order`, `class`) VALUES ".implode(", ", $inserBlocks);
 
-          $this->logs_to_scv($inserBlocks_t, "api_resources_hooked_classes", $api_log_guid);
+            $Fields_hooked_classes = array(
+                "api_log_id" => $api_log_guid,
+                "order" => $order,
+                "class" => strval(trim($class))
+           );
+
+          $this->logs_to_scv($Fields_hooked_classes, "api_resources_hooked_classes", $api_log_guid);
 
         }
 
@@ -134,7 +139,13 @@ class Logger
             }
             $sqls[] = $sql = "INSERT INTO `".LOGDB_NAME."`.`api_resources_background_functions` (`api_log_id`, `order`, `jobId`) VALUES ".implode(", ", $inserBlocks);
 
-          $this->logs_to_scv($inserBlocks_t, "api_resources_background_functions", $api_log_guid);
+            $Fields_backgroundFunctions = array(
+                "api_log_id" => $api_log_guid,
+                "order" => $order,
+                "jobId" => strval(trim($jobId))
+           );
+
+          $this->logs_to_scv($Fields_backgroundFunctions, "api_resources_background_functions", $api_log_guid);
         }
 
 

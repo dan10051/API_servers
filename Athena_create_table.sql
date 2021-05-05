@@ -36,3 +36,29 @@ CREATE EXTERNAL TABLE IF NOT EXISTS api_sys_log (
     FIELDS TERMINATED BY '#'
     LINES TERMINATED BY '\n'
     LOCATION 's3://api-exp-sql-logs/api_sys_log/';
+
+
+
+    CREATE EXTERNAL TABLE IF NOT EXISTS api_resources_hooked_classes (
+
+      api_sessions_id STRING,
+      order INT,
+      class STRING
+      )
+      ROW FORMAT DELIMITED
+      FIELDS TERMINATED BY '#'
+      LINES TERMINATED BY '\n'
+      LOCATION 's3://api-exp-sql-logs/api_resources_hooked_classes/';
+
+
+
+      CREATE EXTERNAL TABLE IF NOT EXISTS api_resources_background_functions (
+
+        api_sessions_id STRING,
+        order INT,
+        jobId STRING
+        )
+        ROW FORMAT DELIMITED
+        FIELDS TERMINATED BY '#'
+        LINES TERMINATED BY '\n'
+        LOCATION 's3://api-exp-sql-logs/api_resources_background_functions /';
