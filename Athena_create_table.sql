@@ -33,7 +33,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS api_sys_log (
     params STRING
     )
     ROW FORMAT DELIMITED
-    FIELDS TERMINATED BY '#'
+    FIELDS TERMINATED BY '\t'
     LINES TERMINATED BY '\n'
     LOCATION 's3://api-exp-sql-logs/api_sys_log/';
 
@@ -46,9 +46,9 @@ CREATE EXTERNAL TABLE IF NOT EXISTS api_sys_log (
       class STRING
       )
       ROW FORMAT DELIMITED
-      FIELDS TERMINATED BY '#'
+      FIELDS TERMINATED BY '\t'
       LINES TERMINATED BY '\n'
-      LOCATION 's3://api-exp-sql-logs/api_resources_hooked_classes/';
+      LOCATION 's3://api-exp-sql-logs/Experimental/api_resources_hooked_classes/';
 
 
 
@@ -59,6 +59,28 @@ CREATE EXTERNAL TABLE IF NOT EXISTS api_sys_log (
         jobId STRING
         )
         ROW FORMAT DELIMITED
-        FIELDS TERMINATED BY '#'
+        FIELDS TERMINATED BY '\t'
         LINES TERMINATED BY '\n'
-        LOCATION 's3://api-exp-sql-logs/api_resources_background_functions /';
+        LOCATION 's3://api-exp-sql-logs/Experimental/api_resources_background_functions /';
+
+
+        CREATE EXTERNAL TABLE IF NOT EXISTS api_resources_sql_queries (
+
+          api_sessions_id STRING,
+          order INT,
+          type STRING,
+          query STRING,
+          debug_backtrace INT,
+          query_md5 STRING,
+          debug_backtrace_md5 STRING,
+          SQLerror STRING,
+          success INT,
+          tte STRING,
+          timestamp STRING,
+          fromCache STRING,
+          server STRING
+          )
+          ROW FORMAT DELIMITED
+          FIELDS TERMINATED BY '\t'
+          LINES TERMINATED BY '\n'
+          LOCATION 's3://api-exp-sql-logs/Experimental/api_resources_sql_queries/';
