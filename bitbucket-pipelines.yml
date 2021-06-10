@@ -12,6 +12,9 @@ pipelines:
            - sed -i "s/knowledgecity.com\/vendors\/kc\/webplayer\/2.0/kcexp.pro\/vendors\/kc\/webplayer/" assets/lessons/quiz/index.html
            - sed -i "s/kcquiz.knowledgecity.com/kcquiz.kcexp.pro/" assets/lessons/quiz/index.html
            - sed -i "s/token:/ApiUrl:'https:\/\/api.kcexp.pro\/v2\/', CDNUrl:'\/\/cdn0.kcexp.pro\/', token:/" assets/lessons/quiz/index.html
+           - sed -i "s/devrmtplayer1.knowledgecity.com/rmtplayer1.kcexp.pro/" config.php
+           - sed -i "s/deviliasuser/root/" config.php
+           - sed -i "s/deviliaspass123/$ILIAS_EXP_PASS/" config.php
 
            - pipe: atlassian/rsync-deploy:0.4.4
              variables:
@@ -79,7 +82,7 @@ pipelines:
              DISTRIBUTION_ID: 'E36MF3KNHKQC70'
 
 
-    deployment-EXP-API-Manual: # Another display name
+    deployment-EXP-API-Manual-DEVOPS-9: # Another display name
     - step:
        name: Deploy DEVOPS-9 MANUALY
        deployment: DEVOPS-9
@@ -89,6 +92,9 @@ pipelines:
          - sed -i "s/knowledgecity.com\/vendors\/kc\/webplayer\/2.0/kcexp.pro\/vendors\/kc\/webplayer/" assets/lessons/quiz/index.html
          - sed -i "s/kcquiz.knowledgecity.com/kcquiz.kcexp.pro/" assets/lessons/quiz/index.html
          - sed -i "s/token:/ApiUrl:'https:\/\/api.kcexp.pro\/v2\/', CDNUrl:'\/\/cdn0.kcexp.pro\/', token:/" assets/lessons/quiz/index.html
+         - sed -i "s/devrmtplayer1.knowledgecity.com/rmtplayer1.kcexp.pro/" config.php
+         - sed -i "s/deviliasuser/root/" config.php
+         - sed -i "s/deviliaspass123/$ILIAS_EXP_PASS/" config.php
 
          - pipe: atlassian/rsync-deploy:0.4.4
            variables:
